@@ -20,11 +20,10 @@ jobs:
         with:
           repository: ''
 
-      - name: launch ssh-agent
-        run: eval "$(ssh-agent -s)"
-
-      - name: add ssh key
-        run: ssh-add docker-key
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: docker-key
 
       - name: Launch project
         run: docker compose up --build -d
