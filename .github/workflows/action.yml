@@ -20,7 +20,10 @@ jobs:
         with:
           repository: ''
 
-      - name: Launch project
+      - name: launch ssh-agent
+        run: eval "$(ssh-agent -s)"
+
+      - name: add ssh key
         run: ssh-add docker-key
 
       - name: Launch project
