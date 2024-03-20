@@ -14,20 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-
       - name: Checkout GH repository
         uses: actions/checkout@v4
         with:
           repository: ''
-
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_DOCKER_KEY }}
-
       - name: Launch project
         run: docker compose up --build -d
-
       - name: Stop project
         run: docker compose down
 
@@ -37,7 +33,6 @@ jobs:
     needs: [check_program_compilation]
     if: github.event_name == 'push'
     steps:
-
       - name: Checkout GH repository
         uses: actions/checkout@v4
         with:
