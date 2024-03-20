@@ -1,11 +1,11 @@
 FROM debian:12
 
 # Install the required packages
-RUN apt-get update && apt-get install -y openssh-server python3 python3-pip
+RUN apt-get update && apt-get install -y openssh-server python3 python3-pip sudo
 
-RUN apt-get install -y sudo
+ENV SSH_PUB_KEY_NAME=docker-key.pub
 
-COPY github_key.pub /root/.ssh/authorized_keys
+COPY ${SSH_PUB_KEY_NAME} /root/.ssh/authorized_keys
 
 COPY sshd_config /etc/ssh/sshd_config
 
@@ -14,7 +14,7 @@ ENV NEW_USER=tmendy
 RUN useradd -ms /bin/bash ${NEW_USER}
 RUN echo "${NEW_USER}:password" | chpasswd
 RUN mkdir /home/${NEW_USER}/.ssh
-COPY github_key.pub /home/${NEW_USER}/.ssh/authorized_keys
+COPY ${SSH_PUB_KEY_NAME} /home/${NEW_USER}/.ssh/authorized_keys
 
 # Add the new user to the sudo group
 RUN usermod -aG sudo ${NEW_USER}

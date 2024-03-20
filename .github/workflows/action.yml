@@ -21,6 +21,9 @@ jobs:
           repository: ''
 
       - name: Launch project
+        run: ssh-add docker-key
+
+      - name: Launch project
         run: docker compose up --build -d
 
       - name: Stop project
