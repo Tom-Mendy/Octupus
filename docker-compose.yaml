@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  web-1:
+    container_name: web-1
+    build: .
+  web-2:
+    container_name: web-2
+    build: .
+  cache-1:
+    container_name: cache-1
+    build: .
