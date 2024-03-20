@@ -21,9 +21,9 @@ jobs:
           repository: ''
 
       - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: docker-key
+          ssh-private-key: $(cat docker-key)
 
       - name: Launch project
         run: docker compose up --build -d
