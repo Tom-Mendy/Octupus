@@ -1,0 +1,72 @@
+- name: Ensure application directory exists
+  ansible.builtin.file:
+    path: /var/www/poll
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Extract poll application
+  ansible.builtin.unarchive:
+    src: poll.tar
+    dest: /var/www/poll
+    owner: www-data
+    group: www-data
+
+- name: Install Python venv package
+  ansible.builtin.apt:
+    name: python3-venv
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Create a virtual environment for the app
+  ansible.builtin.command:
+    cmd: python3 -m venv /var/www/poll/venv
+  args:
+    creates: /var/www/poll/venv
+
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    requirements: /var/www/poll/requirements.txt
+    virtualenv: /var/www/poll/venv
+
+- name: Upload and enable systemd service file
+  ansible.builtin.copy:
+    src: poll.service
+    dest: /etc/systemd/system/poll.service
+
+- name: Ensure result service is running
+  ansible.builtin.systemd:
+    name: poll.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+# handlers:
+#   - name: Restart poll
+#     ansible.builtin.systemd:
+#       name: poll.service
+#       state: restarted
+#       daemon_reload: yes
+
+
+
+# - name: Uploads poll service
+#   copy:
+#     src: ./../files/poll.service
+#     dest: /app/poll.service
+
+# - name: Installs dependencies.
+#   apt:
+#     name: "{{ item }}"
+#     state: present
+#   with_items:
+#     - python3
+#     - python3-pip
+#     - python3-venv
+
+# - name: Runs the poll web client.
+#   command: python3 -m venv /app/poll
+#   args:
+#     chdir: /app
+#   register: venv

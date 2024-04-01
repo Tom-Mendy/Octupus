@@ -1,0 +1,62 @@
+- name: Ensure application directory exists
+  ansible.builtin.file:
+    path: /var/www/result
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Extract result application
+  ansible.builtin.unarchive:
+    src: result.tar
+    dest: /var/www/result
+    owner: www-data
+    group: www-data
+
+- name: Install NodeJS and npm
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nodejs
+    - npm
+
+- name: Install result application dependencies
+  command: npm install
+  args:
+    chdir: /var/www/result
+
+- name: Upload and enable systemd service file
+  ansible.builtin.copy:
+    src: result.service
+    dest: /etc/systemd/system/result.service
+
+- name: Ensure result service is running
+  ansible.builtin.systemd:
+    name: result.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# - name : Uploads result service.
+#   copy:
+#     src: ./../files/result.service
+#     dest: /app/result.service
+
+# - name : Installs dependencies.
+#   apt:
+#     name: "{{ item }}"
+#     state: present
+#   with_items:
+#     - nodejs
+
+# - name : Installs dependencies 2.
+#   command: npm install
+#   args:
+#     chdir: /app
+#   register: npm
+
+# - name: Runs the result web client. 
+#   command: npm start
+#   args:
+#     chdir: /app
+#   register: result

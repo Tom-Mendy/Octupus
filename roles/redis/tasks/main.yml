@@ -1,0 +1,16 @@
+- name: Install redis
+  apt:
+    name: redis-server
+    state: present
+
+- name: start redis
+  systemd_service:
+    name: redis-server
+    state: started
+    enabled: true
+
+- name: Set up redis
+  template:
+    src: ../files/redis.conf
+    dest: /etc/redis/redis.conf
+  notify: restart redis

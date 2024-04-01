@@ -1,0 +1,13 @@
+[Unit]
+Description=Java Worker Application Service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/worker
+ExecStart=/usr/bin/java -jar /path/to/your/app/worker.jar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

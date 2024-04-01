@@ -1,0 +1,6 @@
+- name: Install essential packages
+  apt:
+    name: "{{ item }}"
+  with_items:
+      - git
+      - curl

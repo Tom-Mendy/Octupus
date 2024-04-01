@@ -1,0 +1,39 @@
+- name: Ensure application directory exists
+  ansible.builtin.file:
+    path: /var/www/worker
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Extract worker application
+  ansible.builtin.unarchive:
+    src: worker.tar
+    dest: /var/www/worker
+    owner: www-data
+    group: www-data
+
+- name: Installs dependencies.
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - default-jdk
+    - default-jre
+    - maven
+
+- name: Builds the worker.
+  command: mvn install -f /var/www/worker/pom.xml  # Specify the POM file directly; add debug output if needed
+  args:
+    chdir: /var/www/worker/  # Set the working directory
+
+- name: Upload and enable systemd service file
+  ansible.builtin.copy:
+    src: worker.service
+    dest: /etc/systemd/system/worker.service
+
+- name: Ensure service is enabled and running
+  ansible.builtin.systemd:
+    name: worker.service
+    state: started
+    daemon_reload: yes
+    enabled: yes

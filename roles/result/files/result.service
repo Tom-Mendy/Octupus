@@ -1,0 +1,14 @@
+[Unit]
+Description=Result Node.js App
+After=network.target
+
+[Service]
+Environment=PORT=8080
+Type=simple
+User=www-data
+Group=www-data
+ExecStart=/usr/bin/node /var/www/result/server.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

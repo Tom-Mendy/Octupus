@@ -1,0 +1,58 @@
+- name: Import the repository signing key
+  ansible.builtin.apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add PostgreSQL's repository
+  ansible.builtin.apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+    state: present
+
+- name: Install PostgreSQL 16
+  ansible.builtin.apt:
+    name: postgresql-16
+    state: present
+    update_cache: yes
+
+- name: Install PostgreSQL
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - postgresql-client
+    - python3-pip
+    - python3-psycopg2
+
+- name: Set up postgresql
+  copy:
+    src: ../files/pg_hba.conf
+    dest: /etc/postgresql/16/main/pg_hba.conf
+
+- name: Set up postgresql schema
+  copy:
+    src: ../files/schema.sql
+    dest: /tmp/schema.sql
+
+- name: Ensure the postgresql is started
+  systemd_service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Reload PostgreSQL to apply pg_hba.conf changes
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted
+
+- name: Create a database user
+  community.postgresql.postgresql_user:
+    login_user: postgres  # This is the user Ansible will connect as
+    login_password: your_postgres_password_here  # Only needed if your postgres user requires a password
+    name: "{{ postgres_user }}"
+    password: democracyIsFragile
+    role_attr_flags: NOSUPERUSER,NOCREATEDB
+
+- name: Create the database
+  postgresql_db:
+    name: "{{ postgres_user }}"
+    state: present
+    target: /tmp/schema.sql
