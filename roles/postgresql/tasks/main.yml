@@ -19,10 +19,10 @@
     name: "{{ item }}"
   with_items:
     - postgresql-client
-    - python3-pip
     - python3-psycopg2
+    - acl # setfacl is a utility for manipulating the access control lists (ACLs) of files
 
-- name: Set up postgresql
+- name: Set up postgresql authentication
   copy:
     src: ../files/pg_hba.conf
     dest: /etc/postgresql/16/main/pg_hba.conf
@@ -43,16 +43,38 @@
     name: postgresql
     state: restarted
 
-- name: Create a database user
-  community.postgresql.postgresql_user:
-    login_user: postgres  # This is the user Ansible will connect as
-    login_password: your_postgres_password_here  # Only needed if your postgres user requires a password
-    name: "{{ postgres_user }}"
+- name: Create database user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    db: postgres
+    name: paul
     password: democracyIsFragile
     role_attr_flags: NOSUPERUSER,NOCREATEDB
+    state: present
 
 - name: Create the database
+  become: yes
+  become_user: postgres
   postgresql_db:
-    name: "{{ postgres_user }}"
+    name: paul
+    owner: paul
     state: present
-    target: /tmp/schema.sql
+
+- name: Read the schema SQL script content
+  ansible.builtin.slurp:
+    src: /tmp/schema.sql
+  register: schema_sql_content
+
+- name: Decode the schema SQL script content
+  ansible.builtin.set_fact:
+    schema_sql: "{{ schema_sql_content['content'] | b64decode }}"
+
+- name: Import the schema SQL script
+  become: yes
+  become_user: postgres
+  ansible.builtin.postgresql_query:
+    db: paul
+    query: "{{ schema_sql }}"
+    login_user: paul
+    login_password: democracyIsFragile

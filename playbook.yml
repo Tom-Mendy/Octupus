@@ -2,10 +2,6 @@
   become: yes
   roles:
     - base
-- hosts: result
-  become: yes
-  roles:
-    - result
 
 - hosts: redis
   become: yes
@@ -26,3 +22,8 @@
   become: yes
   roles:
     - worker
+
+- hosts: result
+  become: yes
+  roles:
+    - result
