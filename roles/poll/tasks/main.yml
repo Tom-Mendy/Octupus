@@ -30,7 +30,7 @@
     requirements: /var/www/poll/requirements.txt
     virtualenv: /var/www/poll/venv
 
-- name: Upload and enable systemd service file
+- name: Upload systemd service file
   ansible.builtin.copy:
     src: poll.service
     dest: /etc/systemd/system/poll.service
@@ -39,8 +39,8 @@
   ansible.builtin.systemd:
     name: poll.service
     state: started
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
 
 # handlers:
 #   - name: Restart poll

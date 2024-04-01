@@ -25,7 +25,7 @@
   args:
     chdir: /var/www/result
 
-- name: Upload and enable systemd service file
+- name: Upload systemd service file
   ansible.builtin.copy:
     src: result.service
     dest: /etc/systemd/system/result.service
@@ -34,8 +34,8 @@
   ansible.builtin.systemd:
     name: result.service
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 # - name : Uploads result service.
 #   copy:

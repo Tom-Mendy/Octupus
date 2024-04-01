@@ -12,21 +12,27 @@
     owner: www-data
     group: www-data
 
-- name: Installs dependencies.
+- name: Install maven
   apt:
-    name: "{{ item }}"
+    name: maven
     state: present
-  with_items:
-    - default-jdk
-    - default-jre
-    - maven
+
+- name: Download Java 21
+  command: wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.deb
+  args:
+    chdir: /var/www/worker
+
+- name: Install Java 21
+  command: sudo dpkg -i jdk-21_linux-x64_bin.deb
+  args:
+    chdir: /var/www/worker
 
 - name: Builds the worker.
   command: mvn install -f /var/www/worker/pom.xml  # Specify the POM file directly; add debug output if needed
   args:
     chdir: /var/www/worker/  # Set the working directory
 
-- name: Upload and enable systemd service file
+- name: Upload systemd service file
   ansible.builtin.copy:
     src: worker.service
     dest: /etc/systemd/system/worker.service
@@ -35,5 +41,5 @@
   ansible.builtin.systemd:
     name: worker.service
     state: started
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
