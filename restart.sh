@@ -4,27 +4,15 @@ docker compose down
 
 docker compose up --build -d
 
-aze=("web-1" "web-2" "cache-1")
+aze=("redis" "postgresql" "poll" "worker" "result")
 
+echo "" > my-inventory.yml
 for item in "${aze[@]}"; do
-  echo "${item}"
-  echo "${item} is running"
-  docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${item}
+echo "${item}:" >> my-inventory.yml
+echo "  hosts:" >> my-inventory.yml
+echo "    ${item}-1:" >> my-inventory.yml
+echo "      ansible_host: $(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${item})" >> my-inventory.yml
 done
-
-
-echo "all:
-  children:
-    web:
-      hosts:
-        web-1:
-          ansible_host: $(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "web-1")
-        web-2:
-          ansible_host: $(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "web-2")
-    redis:
-      hosts:
-        cache-1:
-          ansible_host: $(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "cache-1")" > my-inventory.yml
 
 # docker build -t ansible_debian .
 
