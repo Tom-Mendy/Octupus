@@ -33,23 +33,25 @@
     dest: /tmp/schema.sql
 
 - name: Copy postgresql.conf
-  ansible.builtin.copy:
-    src: postgresql.conf
+  ansible.builtin.template:
+    src: ../files/postgresql.conf
     dest: /etc/postgresql/16/main/postgresql.conf
+  register: postgresql_conf
+
+- name: Restart the postgresql service
+  systemd_service:
+    name: postgresql
+    state: restarted
+  when: postgresql_conf.changed
 
 - name: Ensure the postgresql is started
   systemd_service:
     name: postgresql
     state: started
+    daemon_reload: true
     enabled: true
 
-- name: Reload PostgreSQL to apply pg_hba.conf changes
-  ansible.builtin.systemd:
-    name: postgresql
-    state: restarted
-
 - name: Create database user
-  become: yes
   become_user: postgres
   postgresql_user:
     name: "{{ postgresql_username }}"
@@ -58,7 +60,6 @@
     state: present
 
 - name: Create the database
-  become: yes
   become_user: postgres
   postgresql_db:
     name: "{{ postgresql_db }}"
@@ -74,11 +75,11 @@
   ansible.builtin.set_fact:
     schema_sql: "{{ schema_sql_content['content'] | b64decode }}"
 
-- name: Import the schema SQL script
-  become: yes
+- name: Import the schema SQL script into the database
   become_user: postgres
   ansible.builtin.postgresql_query:
     db: "{{ postgresql_db }}"
     query: "{{ schema_sql }}"
     login_user: "{{ postgresql_username }}"
     login_password: "{{ postgresql_password }}"
+  when: schema_sql_content.changed

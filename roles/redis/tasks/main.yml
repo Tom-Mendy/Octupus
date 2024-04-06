@@ -7,18 +7,17 @@
   template:
     src: ../files/redis.conf
     dest: /etc/redis/redis.conf
-  register: override_conf
+  register: redis_conf
 
-- name: stop redis
+- name : Restart redis
   systemd:
     name: redis-server
-    state: stopped
-    enabled: yes
-  when: override_conf.changed
+    state: restarted
+  when: redis_conf.changed
 
 - name: start redis
-  systemd_service:
+  systemd:
     name: redis-server
     state: started
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true

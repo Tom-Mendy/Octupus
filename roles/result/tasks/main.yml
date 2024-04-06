@@ -20,10 +20,16 @@
     - nodejs
     - npm
 
+- name: Check if node_modules exists
+  ansible.builtin.stat:
+    path: /var/www/result/node_modules
+  register: node_modules_folder
+
 - name: Install result application dependencies
   command: npm install
   args:
     chdir: /var/www/result
+  when: not node_modules_folder.stat.exists
 
 - name: Upload systemd service file
   ansible.builtin.template:
