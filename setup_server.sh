@@ -1,13 +1,12 @@
 #!/bin/bash
 
-
 apt-get update && apt-get install -y openssh-server python3 python3-pip sudo
 
 export NEW_USER=tmendy
 useradd -ms /bin/bash ${NEW_USER}
 echo "${NEW_USER}:password" | chpasswd
 mkdir /home/${NEW_USER}/.ssh
-cp /root/.ssh/authorized_keys /home/tmendy/.ssh/authorized_keys
+cp /root/.ssh/authorized_keys /home/${NEW_USER}/.ssh/authorized_keys
 chown -R ${NEW_USER}:${NEW_USER} /home/${NEW_USER}/.ssh
 
 #sudo
