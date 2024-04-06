@@ -14,26 +14,30 @@
 
 - name: Install Python venv package
   ansible.builtin.apt:
-    name: python3-venv
+    name: "{{ item }}"
     state: present
-    update_cache: yes
-  become: yes
+  with_items:
+    - python3-venv
+    - acl
 
 - name: Create a virtual environment for the app
+  become_user: www-data
   ansible.builtin.command:
     cmd: python3 -m venv /var/www/poll/venv
   args:
     creates: /var/www/poll/venv
 
 - name: Install Python dependencies
+  become_user: www-data
   ansible.builtin.pip:
     requirements: /var/www/poll/requirements.txt
     virtualenv: /var/www/poll/venv
 
 - name: Upload systemd service file
-  ansible.builtin.copy:
-    src: poll.service
+  ansible.builtin.template:
+    src: ../files/poll.service
     dest: /etc/systemd/system/poll.service
+    mode: '0644'
 
 - name: Ensure result service is running
   ansible.builtin.systemd:
@@ -41,32 +45,3 @@
     state: started
     daemon_reload: true
     enabled: true
-
-# handlers:
-#   - name: Restart poll
-#     ansible.builtin.systemd:
-#       name: poll.service
-#       state: restarted
-#       daemon_reload: yes
-
-
-
-# - name: Uploads poll service
-#   copy:
-#     src: ./../files/poll.service
-#     dest: /app/poll.service
-
-# - name: Installs dependencies.
-#   apt:
-#     name: "{{ item }}"
-#     state: present
-#   with_items:
-#     - python3
-#     - python3-pip
-#     - python3-venv
-
-# - name: Runs the poll web client.
-#   command: python3 -m venv /app/poll
-#   args:
-#     chdir: /app
-#   register: venv

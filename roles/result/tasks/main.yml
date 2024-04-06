@@ -26,9 +26,10 @@
     chdir: /var/www/result
 
 - name: Upload systemd service file
-  ansible.builtin.copy:
-    src: result.service
+  ansible.builtin.template:
+    src: ../files/result.service
     dest: /etc/systemd/system/result.service
+    mode: '0644'
 
 - name: Ensure result service is running
   ansible.builtin.systemd:
@@ -36,27 +37,3 @@
     state: started
     enabled: true
     daemon_reload: true
-
-# - name : Uploads result service.
-#   copy:
-#     src: ./../files/result.service
-#     dest: /app/result.service
-
-# - name : Installs dependencies.
-#   apt:
-#     name: "{{ item }}"
-#     state: present
-#   with_items:
-#     - nodejs
-
-# - name : Installs dependencies 2.
-#   command: npm install
-#   args:
-#     chdir: /app
-#   register: npm
-
-# - name: Runs the result web client. 
-#   command: npm start
-#   args:
-#     chdir: /app
-#   register: result

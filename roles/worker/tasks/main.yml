@@ -28,14 +28,15 @@
     chdir: /var/www/worker
 
 - name: Builds the worker.
-  command: mvn install -f /var/www/worker/pom.xml  # Specify the POM file directly; add debug output if needed
+  command: mvn install
   args:
-    chdir: /var/www/worker/  # Set the working directory
+    chdir: /var/www/worker/
 
 - name: Upload systemd service file
-  ansible.builtin.copy:
-    src: worker.service
+  ansible.builtin.template:
+    src: ../files/worker.service
     dest: /etc/systemd/system/worker.service
+    mode: '0644'
 
 - name: Ensure service is enabled and running
   ansible.builtin.systemd:

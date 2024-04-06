@@ -1,13 +1,12 @@
 [Unit]
 Description=Java Worker Application Service
-After=network.target
 
 [Service]
-User=www-data
-Group=www-data
+Environment=REDIS_HOST={{ hostvars['redis'].ansible_host }}
+Environment=POSTGRES_USER={{ postgresql_username }}
+Environment=POSTGRES_PASSWORD={{ postgresql_password }}
+Environment=POSTGRES_HOST={{ hostvars['postgresql'].ansible_host }}
+Environment=POSTGRES_PORT={{ postgresql_port }}
+Environment=POSTGRES_DB={{ postgresql_db }}
 WorkingDirectory=/var/www/worker
-ExecStart=/usr/bin/java -jar /var/www/worker/app/worker.jar
-SuccessExitStatus=143
-
-[Install]
-WantedBy=multi-user.target
+ExecStart=/usr/bin/java -jar /var/www/worker/target/worker-jar-with-dependencies.jar

@@ -1,4 +1,7 @@
 - name: Install essential packages
   apt:
-    name: curl
+    name: "{{ item }}"
     state: present
+  with_items:
+    - git
+    - curl

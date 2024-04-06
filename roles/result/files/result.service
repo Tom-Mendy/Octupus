@@ -1,14 +1,12 @@
 [Unit]
 Description=Result Node.js App
-After=network.target
 
 [Service]
-Environment=PORT=8080
-Type=simple
-User=www-data
-Group=www-data
-ExecStart=/usr/bin/node /var/www/result/server.js
+Environment=POSTGRES_USER={{ postgresql_username }}
+Environment=POSTGRES_PASSWORD={{ postgresql_password }}
+Environment=POSTGRES_HOST={{ hostvars['postgresql'].ansible_host }}
+Environment=POSTGRES_PORT={{ postgresql_port }}
+Environment=POSTGRES_DB={{ postgresql_db }}
+WorkingDirectory=/var/www/result
+ExecStart=node server.js
 Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target

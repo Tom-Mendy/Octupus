@@ -19,7 +19,7 @@
     name: "{{ item }}"
   with_items:
     - postgresql-client
-    - python3-psycopg2
+    - python3-psycopg2 # psycopg2 is a PostgreSQL adapter for Python
     - acl # setfacl is a utility for manipulating the access control lists (ACLs) of files
 
 - name: Set up postgresql authentication
@@ -31,6 +31,11 @@
   copy:
     src: ../files/schema.sql
     dest: /tmp/schema.sql
+
+- name: Copy postgresql.conf
+  ansible.builtin.copy:
+    src: postgresql.conf
+    dest: /etc/postgresql/16/main/postgresql.conf
 
 - name: Ensure the postgresql is started
   systemd_service:
@@ -47,9 +52,8 @@
   become: yes
   become_user: postgres
   postgresql_user:
-    db: postgres
-    name: paul
-    password: democracyIsFragile
+    name: "{{ postgresql_username }}"
+    password: "{{ postgresql_password }}"
     role_attr_flags: NOSUPERUSER,NOCREATEDB
     state: present
 
@@ -57,8 +61,8 @@
   become: yes
   become_user: postgres
   postgresql_db:
-    name: paul
-    owner: paul
+    name: "{{ postgresql_db }}"
+    owner: "{{ postgresql_username }}"
     state: present
 
 - name: Read the schema SQL script content
@@ -74,7 +78,7 @@
   become: yes
   become_user: postgres
   ansible.builtin.postgresql_query:
-    db: paul
+    db: "{{ postgresql_db }}"
     query: "{{ schema_sql }}"
-    login_user: paul
-    login_password: democracyIsFragile
+    login_user: "{{ postgresql_username }}"
+    login_password: "{{ postgresql_password }}"

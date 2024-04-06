@@ -1,2 +1,6 @@
 B-DOP_poll_application
 my-inventory.yml
+production
+password.txt
+setup_server.sh
+setup_vault.sh
